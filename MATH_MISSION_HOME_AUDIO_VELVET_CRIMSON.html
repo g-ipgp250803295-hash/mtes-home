@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Math Mission — Home Audio</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:12px;background:transparent;font-family:Arial,Helvetica,sans-serif;color:#fff8f1}.player{max-width:1080px;margin:auto;background:#45171B;border:2px solid #cba06e;border-radius:21px;padding:26px 28px 23px;box-shadow:0 9px 25px #230B0E40;text-align:center}.music{color:#e7c28e;font-size:26px;margin-bottom:6px}.eyebrow{font-size:11px;letter-spacing:3px;color:#e7c28e;font-weight:800;margin:4px 0 11px}.heading{font-family:Georgia,serif;font-weight:700;font-size:clamp(25px,4.8vw,39px);line-height:1.12;margin:0 0 10px}.intro{font-size:15px;line-height:1.55;margin:0 auto;max-width:580px}.line{height:1px;background:#d1a87e;margin:24px 0}.controls{display:flex;align-items:center;gap:15px}.play{border:0;border-radius:50%;width:54px;height:54px;flex:none;background:#fff5e7;color:#45171B;font-size:22px;cursor:pointer}.play:focus-visible,.replay:focus-visible,.seek:focus-visible{outline:3px solid #fff;outline-offset:3px}.timeline{flex:1;min-width:0}.seek{width:100%;margin:0;accent-color:#fff5e7;cursor:pointer}.times{display:flex;justify-content:space-between;font-size:12px;color:#f5e7df;margin-top:3px}.replay{border:1px solid #e5bd8f;background:transparent;color:#fff5e7;border-radius:11px;padding:11px 14px;cursor:pointer;white-space:nowrap}.hint{margin:20px 0 0;font-size:13px;color:#f5e7df;line-height:1.6}.status{min-height:18px;margin:7px 0 0;font-size:12px;color:#f1cfa8}details{margin:12px auto 0;max-width:760px;text-align:left;font-size:13px}summary{cursor:pointer;color:#ffe5bf;text-align:center}.transcript{white-space:pre-line;line-height:1.7;margin-top:12px;padding:14px;background:#ffffff12;border-radius:10px}@media(max-width:550px){body{padding:6px}.player{padding:22px 15px}.controls{gap:10px}.play{width:46px;height:46px}.replay{padding:9px 10px}.eyebrow{letter-spacing:1.5px;font-size:10px}.intro{font-size:14px}}
+</style>
+</head>
+<body>
+<section class="player" aria-label="Math Mission audio briefing">
+<div class="music" aria-hidden="true">♫</div>
+<div class="eyebrow">✦ MATH MISSION · AUDIO BRIEFING ✦</div>
+<h1 class="heading">LISTEN FIRST...</h1>
+<p class="intro">Let your Math Detective guide you through the mission.<br>Press play to begin your adventure!</p>
+<div class="line"></div>
+<div class="controls">
+<button class="play" id="play" aria-label="Play audio">▶</button>
+<div class="timeline"><input id="seek" class="seek" type="range" min="0" max="100" value="0" aria-label="Audio progress" disabled><div class="times"><span id="elapsed">0:00</span><span id="duration">~1 min</span></div></div>
+<button class="replay" id="replay">↻ Replay</button>
+</div>
+<p class="hint">Press ▶ to listen. Press ❚❚ to pause, or Replay to hear it again.<br>Make sure your device sound is turned on.</p>
+<p class="status" id="status" aria-live="polite"></p>
+<details><summary>Read audio transcript</summary><div class="transcript" id="transcript"></div></details>
+</section>
+<script>
+const script=`Welcome, Math Detective, to Math Mission: The Hidden Code!
+Your adventure begins here.
+In this mission, you will learn to solve Year Five combined-operation word problems by thinking carefully and explaining your reasoning.
+First, explore the mission briefing and review your learning notes.
+Next, complete three detective missions.
+For each challenge, interpret the problem, represent the quantities, choose a strategy, justify your thinking, and verify your answer.
+Your teacher will review your work using three checks: the Relationship Check, the Strategy Check, and the Reasoning Check.
+Remember, your mission is not just to find an answer. It is to show why your answer makes sense.
+Are you ready to crack the hidden code? Your mathematical adventure starts now!`;
+const play=document.getElementById('play'),replay=document.getElementById('replay'),status=document.getElementById('status');document.getElementById('transcript').textContent=script;
+let speaking=false,paused=false,utterance=null;
+function icon(){play.textContent=speaking&&!paused?'❚❚':'▶';play.setAttribute('aria-label',speaking&&!paused?'Pause audio':'Play audio')}
+function supported(){if(!('speechSynthesis'in window)){status.textContent='Audio playback is unavailable in this browser. Please read the transcript below.';return false}return true}
+function start(){if(!supported())return;window.speechSynthesis.cancel();utterance=new SpeechSynthesisUtterance(script);utterance.lang='en-GB';utterance.rate=.9;utterance.pitch=1;const voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>v.lang.toLowerCase().startsWith('en')&&/female|samantha|zira|google uk english female/i.test(v.name))||voices.find(v=>v.lang.toLowerCase().startsWith('en'));if(voice)utterance.voice=voice;utterance.onstart=()=>{speaking=true;paused=false;status.textContent='Now playing';icon()};utterance.onend=()=>{speaking=false;paused=false;status.textContent='Briefing complete!';icon()};utterance.onerror=()=>{speaking=false;paused=false;status.textContent='Audio could not play here. Try opening in Chrome or Edge, or read the transcript.';icon()};speaking=true;paused=false;status.textContent='Preparing audio...';icon();window.speechSynthesis.speak(utterance)}
+play.addEventListener('click',()=>{if(!supported())return;if(!speaking){start()}else if(paused){window.speechSynthesis.resume();paused=false;status.textContent='Now playing';icon()}else{window.speechSynthesis.pause();paused=true;status.textContent='Paused';icon()}});
+replay.addEventListener('click',start);
+window.addEventListener('pagehide',()=>{if('speechSynthesis'in window)window.speechSynthesis.cancel()});
+// SpeechSynthesis does not expose reliable duration or seek positions; timeline is decorative and disabled.
+</script>
+</body></html>
